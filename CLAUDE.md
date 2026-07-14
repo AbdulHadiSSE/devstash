@@ -2,7 +2,7 @@
 
 ## Overview
 
-DevStash is a greenfield Next.js project in its earliest stage — scaffolded via `create-next-app` with the App Router, but containing virtually no application code yet. The `layout.tsx` is empty and `page.tsx` renders a single `<h1>DevStash</h1>`.
+DevStash is a unified hub for developer knowledge and resources, built with Next.js App Router. The **product vision** includes saving, organizing, searching, and AI-enhancing code snippets, prompts, commands, notes, files, images, and links, with a freemium model via Stripe. **Current codebase:** early scaffold only — see Current State below.
 
 ## Tech Stack
 
@@ -11,69 +11,61 @@ DevStash is a greenfield Next.js project in its earliest stage — scaffolded vi
 | **Framework** | Next.js | `16.2.10` | App Router. React Compiler enabled (`reactCompiler: true`). |
 | **UI Library** | React | `19.2.4` | With `react-dom@19.2.4`. |
 | **Language** | TypeScript | `^5` | Strict mode, `bundler` module resolution, `@/*` → `./src/*` path alias. |
-| **Styling** | Tailwind CSS v4 | `^4` | Via `@tailwindcss/postcss` PostCSS plugin. CSS-first config (no `tailwind.config.js`). |
-| **Compiler Plugin** | React Compiler | `babel-plugin-react-compiler@1.0.0` | Activated in `next.config.ts`. |
-| **Linting** | ESLint 9 | `^9` | Flat config using `eslint-config-next` (core-web-vitals + typescript). |
+| **Styling** | Tailwind CSS | `^4` | Via `@tailwindcss/postcss` plugin. CSS-first config in `src/app/globals.css`. |
+| **Linting** | ESLint | `^9` | Flat config. |
 | **Package Manager** | npm | — | `package-lock.json` present. |
-
-## Folder Structure
-
-```
-devstash/
-├── public/                  # Static assets (currently empty)
-├── src/
-│   └── app/                 # Next.js App Router root
-│       ├── favicon.ico
-│       ├── globals.css      # Tailwind v4 import
-│       ├── layout.tsx       # Root layout (⚠ EMPTY — needs implementation)
-│       └── page.tsx         # Home route — renders <h1>DevStash</h1>
-├── .gitignore
-├── CLAUDE.md                # This file — project context
-├── eslint.config.mjs        # ESLint 9 flat config
-├── next.config.ts           # Next.js config (React Compiler on)
-├── package.json
-├── postcss.config.mjs       # Tailwind v4 via @tailwindcss/postcss
-└── tsconfig.json            # Strict TS, bundler resolution, @/* alias
-```
 
 ## Key Patterns & Conventions
 
+> The patterns below describe the **target architecture** from the product spec. They are not yet implemented in the codebase.
+
 ### App Router (Next.js 16)
-- Uses the `src/app/` directory for routing.
-- Pages are defined via `page.tsx` files in route directories.
-- Layout nesting through `layout.tsx` files.
+- **Server Components by Default**: Fetch data directly with Prisma in server components.
+- **Server Actions**: Used for form submissions and simple mutations. Always return `{ success, data, error }`.
+- **API Routes**: Used only for webhooks (Stripe), file uploads (R2), and specific HTTP handlers.
 - **Next.js 16.2.10 may differ from training data** — always consult `node_modules/next/dist/docs/` before writing code.
 
 ### Tailwind CSS v4
-- **No `tailwind.config.js`** — v4 uses CSS-first configuration directly in CSS.
+- **No `tailwind.config.js`** — v4 uses CSS-first configuration directly in CSS (`src/app/globals.css`).
 - Theme customization, custom utilities, and plugins are declared in CSS using `@theme`, `@utility`, etc.
 
-### React Compiler
-- Automatic memoization — manual `useMemo`, `useCallback`, and `React.memo` are generally unnecessary.
-- Components must follow the Rules of React for the compiler to optimize correctly.
+### Database (Prisma)
+- **Never use `db push`**: Always use `prisma migrate dev` for schema changes.
+- **N+1 Query Prevention**: Utilize Prisma `_count` and `take`/`skip` appropriately.
 
-### Import Alias
-- Use `@/` to reference anything under `src/`. Example: `import Foo from '@/app/components/Foo'`.
+### Authentication & Gating
+- Access session securely via `getAuthedSession()` helper in `src/lib/action-utils.ts`.
+- Gate pro features (files, images, AI) using the `requirePro()` helper and DB subscription status.
 
-## Configuration Summary
-
-- **TypeScript**: ES2017 target, strict mode, `react-jsx`, incremental builds, `@/*` path alias.
-- **Next.js**: `reactCompiler: true`. No custom rewrites/redirects/headers.
-- **PostCSS**: Tailwind v4 via `@tailwindcss/postcss` plugin.
-- **ESLint**: Flat config (ESLint 9). Ignores `.next/`, `out/`, `build/`, `next-env.d.ts`.
+### Testing
+- Vitest is used for unit tests (server actions and utilities).
+- Run with `npm run test`. Test files live next to source files (`feature.test.ts`).
 
 ## Current State
 
-| Aspect | Status |
-|---|---|
-| Root layout | ⚠ **Empty** — must be implemented before the app renders |
-| Routes | Only `/` exists (bare `<h1>`) |
-| Components | None |
-| API routes | None |
-| Database / Auth | Not configured |
-| Testing | Not configured |
-| CI/CD | Not configured |
-| Environment variables | No `.env` files |
+Early scaffold only. The following exist:
+
+- **Next.js 16 + React 19** — `package.json`, `next.config.ts`
+- **TypeScript** — strict mode, path alias (`tsconfig.json`)
+- **Tailwind CSS v4** — minimal setup (`src/app/globals.css`, `postcss.config.mjs`)
+- **React Compiler** — enabled (`next.config.ts`)
+- **ESLint 9** — flat config (`eslint.config.mjs`)
+- **Root layout** — metadata title/description (`src/app/layout.tsx`)
+- **Placeholder homepage** — `<h1>DevStash</h1>` at `/` (`src/app/page.tsx`)
+- **UI design references** — screenshots in `context/screenshots/` (not implemented as code)
+
+**Not yet started:** database, auth, dashboard, items/collections CRUD, search, file uploads, AI, Stripe, tests, or any planned dependencies (Prisma, NextAuth, shadcn/ui, etc.).
+
+## Development Workflow
+
+1. **Document**: Document the feature/fix in `context/current-feature.md`.
+2. **Branch**: Create a new branch (`feature/*` or `fix/*`).
+3. **Implement**: Write code making minimal changes to accomplish the task.
+4. **Test**: Run `npm run test` and `npm run build` to verify.
+5. **Iterate**: Fix any issues.
+6. **Commit**: Use conventional commits. Never commit if tests/build fail. Ask for permission first.
+7. **Merge & Clean**: Merge to main and delete the branch.
+8. **Mark Done**: Update `current-feature.md`.
 
 ## Scripts
 
