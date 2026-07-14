@@ -19,3 +19,5 @@ Not Started
 ## History
 
 <!-- Keep this updated. Earliest to latest -->
+
+- Initial setup of Next.js (App Router, Tailwind v4, React Compiler)
