@@ -1,5 +1,6 @@
 import { PinnedItems } from "@/components/dashboard/pinned-items";
 import { RecentCollections } from "@/components/dashboard/recent-collections";
+import { RecentItemsList } from "@/components/dashboard/recent-items-list";
 
 export default function DashboardPage() {
   return (
@@ -12,6 +13,7 @@ export default function DashboardPage() {
       <div className="space-y-10">
         <RecentCollections />
         <PinnedItems />
+        <RecentItemsList />
       </div>
     </div>
   );

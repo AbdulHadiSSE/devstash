@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { mockCollections, mockItemTypes } from "@/lib/mock-data";
 import { Star, MoreHorizontal, Code, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const getTypeIcon = (iconName: string) => {
-  const icons: Record<string, any> = {
+const getTypeIcon = (iconName: string): LucideIcon => {
+  const icons: Record<string, LucideIcon> = {
     Code, Sparkles, Terminal, StickyNote, File, Image, Link: LinkIcon
   };
-  return icons[iconName] || File;
+  return icons[iconName] ?? File;
 };
 
 export function RecentCollections() {

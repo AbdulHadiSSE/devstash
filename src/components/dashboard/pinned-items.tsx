@@ -2,12 +2,13 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { mockItems, mockItemTypes } from "@/lib/mock-data";
 import { Code, Sparkles, Terminal, StickyNote, File, Image, Link as LinkIcon, Pin, Star } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const getTypeIcon = (iconName: string) => {
-  const icons: Record<string, any> = {
+const getTypeIcon = (iconName: string): LucideIcon => {
+  const icons: Record<string, LucideIcon> = {
     Code, Sparkles, Terminal, StickyNote, File, Image, Link: LinkIcon
   };
-  return icons[iconName] || File;
+  return icons[iconName] ?? File;
 };
 
 export function PinnedItems() {
