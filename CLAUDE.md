@@ -43,7 +43,7 @@ DevStash is a unified hub for developer knowledge and resources, built with Next
 
 ## Current State
 
-Early scaffold only. The following exist:
+Early scaffold and initial UI. The following exist:
 
 - **Next.js 16 + React 19** — `package.json`, `next.config.ts`
 - **TypeScript** — strict mode, path alias (`tsconfig.json`)
@@ -52,9 +52,12 @@ Early scaffold only. The following exist:
 - **ESLint 9** — flat config (`eslint.config.mjs`)
 - **Root layout** — metadata title/description (`src/app/layout.tsx`)
 - **Placeholder homepage** — `<h1>DevStash</h1>` at `/` (`src/app/page.tsx`)
-- **UI design references** — screenshots in `context/screenshots/` (not implemented as code)
+- **Shadcn UI** — initialized with `next-themes` and `lucide-react`
+- **Dashboard UI Phase 1** — main dashboard layout at `/dashboard` with TopBar (dummy search, new item buttons) and placeholders for Sidebar and Main content.
+- **Mock Data** — static arrays for development (`src/lib/mock-data.ts`)
+- **UI design references** — screenshots in `context/screenshots/`
 
-**Not yet started:** database, auth, dashboard, items/collections CRUD, search, file uploads, AI, Stripe, tests, or any planned dependencies (Prisma, NextAuth, shadcn/ui, etc.).
+**Not yet started:** database, auth, items/collections CRUD, search, file uploads, AI, Stripe, tests, or any planned dependencies (Prisma, NextAuth, etc.).
 
 ## Development Workflow
 
