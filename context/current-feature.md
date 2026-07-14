@@ -6,7 +6,12 @@ Done
 
 ## Goals
 
-<!-- Define goals here -->
+Implement Dashboard UI Phase 3 (reference: `context/features/dashboard-phase-3-spec.md`):
+- The main area to the right
+- Recent collections
+- Pinned Items
+- 10 Recent items
+- 4 stats cards at the top for number of items, collections, favorite items and favorite collections
 
 ## Notes
 
@@ -22,3 +27,4 @@ Done
 - **Root Layout & Placeholder Homepage** - Basic root layout with DevStash metadata (`src/app/layout.tsx`); minimal `<h1>DevStash</h1>` placeholder at `/` (`src/app/page.tsx`)
 - **Dashboard UI Phase 1** - ShadCN UI initialized with `next-themes` and `lucide-react`. Built the main dashboard layout at `/dashboard` enforcing dark mode by default. Included a `TopBar` with dummy search and new item buttons, alongside basic placeholders for the `Sidebar` and `Main` content areas.
 - **Dashboard UI Phase 2** - Built collapsible sidebar with Types, Favorite Collections, Recent Items, and User Avatar using mock data. Added mobile drawer via Shadcn `Sheet`. Integrated `DashboardShell` client component for layout state management. (`src/components/layout/sidebar.tsx`, `mobile-sidebar.tsx`, `dashboard-shell.tsx`)
+- **Dashboard UI Phase 3** - Built main dashboard components (`DashboardStats`, `PinnedItems`, `RecentCollections`, `RecentItemsList`) and assembled them into the `/dashboard` page using a responsive grid layout. (`src/components/dashboard/*.tsx`, `src/app/(dashboard)/dashboard/page.tsx`)

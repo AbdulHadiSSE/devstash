@@ -20,30 +20,56 @@ export const mockCollections = [
   {
     id: "col-1",
     name: "React Patterns",
-    description: "Common React hooks and components",
+    description: "Common React patterns and hooks",
     isFavorite: true,
     itemCount: 12,
+    colorClass: "border-l-blue-500",
+    activeTypes: ["type-1", "type-4", "type-7"]
   },
   {
     id: "col-2",
     name: "Python Snippets",
-    description: "Useful Python utility functions",
+    description: "Useful Python code snippets",
     isFavorite: false,
-    itemCount: 5,
+    itemCount: 6,
+    colorClass: "border-l-cyan-500",
+    activeTypes: ["type-1", "type-4"]
   },
   {
     id: "col-3",
     name: "Context Files",
-    description: "Project context markdown files",
+    description: "AI context files for projects",
     isFavorite: true,
-    itemCount: 8,
+    itemCount: 5,
+    colorClass: "border-l-zinc-600",
+    activeTypes: ["type-5", "type-4"]
   },
   {
     id: "col-4",
     name: "Interview Prep",
-    description: "Notes and snippets for interviews",
+    description: "Technical interview preparation",
     isFavorite: false,
     itemCount: 24,
+    colorClass: "border-l-amber-500",
+    activeTypes: ["type-4", "type-1", "type-7", "type-2"]
+  },
+  {
+    id: "col-5",
+    name: "Git Commands",
+    description: "Frequently used git commands",
+    isFavorite: true,
+    itemCount: 15,
+    colorClass: "border-l-orange-500",
+    activeTypes: ["type-3", "type-4"]
+  },
+  {
+    id: "col-6",
+    name: "AI Prompts",
+    description: "Curated AI prompts for coding",
+    isFavorite: false,
+    itemCount: 18,
+    colorClass: "border-l-violet-500",
+    activeTypes: ["type-2", "type-1", "type-4"]
   },
 ];
 

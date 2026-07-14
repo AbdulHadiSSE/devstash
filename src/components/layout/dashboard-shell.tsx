@@ -8,15 +8,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <TopBar />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          isCollapsed={isSidebarCollapsed} 
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
-          className="hidden md:flex"
+    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
+      <Sidebar 
+        isCollapsed={isSidebarCollapsed} 
+        className="hidden md:flex"
+      />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <TopBar 
+          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+          isSidebarCollapsed={isSidebarCollapsed} 
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/20">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
