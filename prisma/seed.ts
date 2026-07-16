@@ -18,19 +18,22 @@ const systemItemTypes = [
 const DEMO_USER_EMAIL = "demo@devstash.io";
 const DEMO_USER_PASSWORD = "12345678";
 
-type SeedTextItem = {
+type SeedItemCommon = {
   title: string;
   description: string;
   typeName: string;
+  isPinned?: boolean;
+  isFavorite?: boolean;
+  tags?: string[];
+};
+
+type SeedTextItem = SeedItemCommon & {
   contentType: "TEXT";
   content: string;
   language?: string;
 };
 
-type SeedUrlItem = {
-  title: string;
-  description: string;
-  typeName: string;
+type SeedUrlItem = SeedItemCommon & {
   contentType: "URL";
   url: string;
 };
@@ -55,6 +58,9 @@ const seedCollections: SeedCollection[] = [
         typeName: "snippet",
         contentType: "TEXT",
         language: "typescript",
+        isPinned: true,
+        isFavorite: true,
+        tags: ["react", "hooks"],
         content: `import { useEffect, useState } from "react";
 
 export function useDebounce<T>(value: T, delayMs = 300): T {
@@ -185,6 +191,8 @@ Keep it concise — skip anything a reader could infer from well-named identifie
         description: "Get a refactor plan without changing external behavior",
         typeName: "prompt",
         contentType: "TEXT",
+        isPinned: true,
+        tags: ["ai", "refactoring"],
         content: `Analyze the following code and propose a refactor that improves readability and reduces duplication without changing external behavior.
 
 Requirements:
@@ -237,6 +245,8 @@ CMD ["npm", "start"]`,
         typeName: "command",
         contentType: "TEXT",
         language: "bash",
+        isFavorite: true,
+        tags: ["deploy", "devops"],
         content: "npm run build && npx vercel deploy --prod",
       },
       {
@@ -393,6 +403,11 @@ async function seedCollectionsAndItems(userId: string) {
         throw new Error(`Unknown item type "${seedItem.typeName}" for item "${seedItem.title}"`);
       }
 
+      const tagsData = seedItem.tags?.map((name) => ({
+        where: { name },
+        create: { name },
+      }));
+
       let item = await prisma.item.findFirst({
         where: { title: seedItem.title, userId },
       });
@@ -406,8 +421,20 @@ async function seedCollectionsAndItems(userId: string) {
             content: seedItem.contentType === "TEXT" ? seedItem.content : undefined,
             url: seedItem.contentType === "URL" ? seedItem.url : undefined,
             language: seedItem.contentType === "TEXT" ? seedItem.language : undefined,
+            isPinned: seedItem.isPinned ?? false,
+            isFavorite: seedItem.isFavorite ?? false,
             userId,
             itemTypeId,
+            tags: tagsData ? { connectOrCreate: tagsData } : undefined,
+          },
+        });
+      } else {
+        item = await prisma.item.update({
+          where: { id: item.id },
+          data: {
+            isPinned: seedItem.isPinned ?? false,
+            isFavorite: seedItem.isFavorite ?? false,
+            tags: tagsData ? { connectOrCreate: tagsData } : undefined,
           },
         });
       }

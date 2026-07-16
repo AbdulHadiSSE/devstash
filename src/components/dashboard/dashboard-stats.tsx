@@ -1,12 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockItems, mockCollections } from "@/lib/mock-data";
+import { getDashboardStats } from "@/lib/db/items";
 import { Layers, Star, FileText, Heart } from "lucide-react";
 
-export function DashboardStats() {
-  const totalItems = mockItems.length;
-  const totalCollections = mockCollections.length;
-  const favoriteItems = mockItems.filter((item) => item.isFavorite).length;
-  const favoriteCollections = mockCollections.filter((col) => col.isFavorite).length;
+export async function DashboardStats() {
+  const { totalItems, totalCollections, favoriteItems, favoriteCollections } =
+    await getDashboardStats();
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

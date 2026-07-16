@@ -1,12 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { mockItems, mockItemTypes } from "@/lib/mock-data";
+import { getPinnedItems } from "@/lib/db/items";
 import { getTypeIcon, getTypeClasses } from "@/lib/constants/item-types";
 import { Pin, Star } from "lucide-react";
 
-export function PinnedItems() {
-  const pinnedItems = mockItems.filter(item => item.isPinned);
+export async function PinnedItems() {
+  const pinnedItems = await getPinnedItems();
 
   if (pinnedItems.length === 0) {
     return null;
@@ -22,9 +22,8 @@ export function PinnedItems() {
       </div>
       <div className="flex flex-col gap-3">
         {pinnedItems.map((item) => {
-          const typeDef = mockItemTypes.find(t => t.id === item.typeId);
-          const Icon = getTypeIcon(typeDef?.name);
-          const typeClasses = getTypeClasses(typeDef?.name);
+          const Icon = getTypeIcon(item.typeName);
+          const typeClasses = getTypeClasses(item.typeName);
 
           // Format date like "Jan 15"
           const date = new Date(item.createdAt);

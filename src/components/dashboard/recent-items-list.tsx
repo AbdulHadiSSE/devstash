@@ -1,15 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { mockItems, mockItemTypes } from "@/lib/mock-data";
+import { getRecentItems } from "@/lib/db/items";
 import { getTypeIcon, getTypeClasses } from "@/lib/constants/item-types";
 import { Clock, Star } from "lucide-react";
 
-export function RecentItemsList() {
-  const items = mockItems
-    .filter((item) => !item.isPinned)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+export async function RecentItemsList() {
+  const items = await getRecentItems();
 
   if (items.length === 0) return null;
 
@@ -23,9 +20,8 @@ export function RecentItemsList() {
       </div>
       <div className="flex flex-col gap-3">
         {items.map((item) => {
-          const typeDef = mockItemTypes.find((t) => t.id === item.typeId);
-          const Icon = getTypeIcon(typeDef?.name);
-          const typeClasses = getTypeClasses(typeDef?.name);
+          const Icon = getTypeIcon(item.typeName);
+          const typeClasses = getTypeClasses(item.typeName);
           const formattedDate = new Date(item.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
