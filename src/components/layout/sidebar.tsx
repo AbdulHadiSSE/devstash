@@ -34,13 +34,13 @@ export function Sidebar({
     <div
       className={cn(
         "flex flex-col border-r bg-background transition-all duration-300",
-        isCollapsed ? "w-[68px]" : "w-64",
+        isCollapsed ? "w-17" : "w-64",
         className
       )}
     >
       <div className="flex h-16 items-center px-4">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 text-white shrink-0">
             <Layers className="h-4 w-4" />
           </div>
           {!isCollapsed && <span className="text-lg font-bold text-foreground">DevStash</span>}

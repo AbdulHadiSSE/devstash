@@ -36,7 +36,7 @@ export function MobileSidebar({ itemTypes, favoriteCollections, recentCollection
         <Menu className="h-5 w-5" />
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="p-0 w-[280px]">
+        <SheetContent side="left" className="p-0 w-70">
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <SheetDescription className="sr-only">Mobile navigation sidebar</SheetDescription>
           <Sidebar
