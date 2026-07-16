@@ -21,6 +21,16 @@ export const ITEM_TYPE_NAMES = [
 
 export type ItemTypeName = (typeof ITEM_TYPE_NAMES)[number];
 
+export const ITEM_TYPE_LABELS: Record<ItemTypeName, string> = {
+  snippet: "Snippets",
+  prompt: "Prompts",
+  command: "Commands",
+  note: "Notes",
+  file: "Files",
+  image: "Images",
+  link: "Links",
+};
+
 export const ITEM_TYPE_ICONS: Record<ItemTypeName, LucideIcon> = {
   snippet: Code,
   prompt: Sparkles,
@@ -46,17 +56,18 @@ interface ItemTypeClasses {
   border: string;
   text: string;
   chip: string;
+  dot: string;
 }
 
 // Class strings must stay static literals so Tailwind's source scan emits them.
 export const ITEM_TYPE_CLASSES: Record<ItemTypeName, ItemTypeClasses> = {
-  snippet: { border: "border-l-snippet", text: "text-snippet", chip: "bg-snippet/10 text-snippet" },
-  prompt: { border: "border-l-prompt", text: "text-prompt", chip: "bg-prompt/10 text-prompt" },
-  command: { border: "border-l-command", text: "text-command", chip: "bg-command/10 text-command" },
-  note: { border: "border-l-note", text: "text-note", chip: "bg-note/10 text-note" },
-  file: { border: "border-l-file", text: "text-file", chip: "bg-file/10 text-file" },
-  image: { border: "border-l-image", text: "text-image", chip: "bg-image/10 text-image" },
-  link: { border: "border-l-link", text: "text-link", chip: "bg-link/10 text-link" },
+  snippet: { border: "border-l-snippet", text: "text-snippet", chip: "bg-snippet/10 text-snippet", dot: "bg-snippet" },
+  prompt: { border: "border-l-prompt", text: "text-prompt", chip: "bg-prompt/10 text-prompt", dot: "bg-prompt" },
+  command: { border: "border-l-command", text: "text-command", chip: "bg-command/10 text-command", dot: "bg-command" },
+  note: { border: "border-l-note", text: "text-note", chip: "bg-note/10 text-note", dot: "bg-note" },
+  file: { border: "border-l-file", text: "text-file", chip: "bg-file/10 text-file", dot: "bg-file" },
+  image: { border: "border-l-image", text: "text-image", chip: "bg-image/10 text-image", dot: "bg-image" },
+  link: { border: "border-l-link", text: "text-link", chip: "bg-link/10 text-link", dot: "bg-link" },
 };
 
 function isItemTypeName(name: string): name is ItemTypeName {
@@ -69,4 +80,8 @@ export function getTypeIcon(name: string | undefined): LucideIcon {
 
 export function getTypeClasses(name: string | undefined): ItemTypeClasses {
   return name && isItemTypeName(name) ? ITEM_TYPE_CLASSES[name] : ITEM_TYPE_CLASSES.file;
+}
+
+export function getTypeLabel(name: string): string {
+  return isItemTypeName(name) ? ITEM_TYPE_LABELS[name] : name;
 }

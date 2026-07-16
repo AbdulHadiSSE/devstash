@@ -1,28 +1,34 @@
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { mockUser, mockItemTypes, mockCollections, mockItems } from "@/lib/mock-data"
-import { getTypeIcon, getTypeClasses } from "@/lib/constants/item-types"
+import { mockUser } from "@/lib/mock-data"
+import { getTypeIcon, getTypeClasses, getTypeLabel } from "@/lib/constants/item-types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChevronDown, Folder, Layers, Settings, Star } from "lucide-react"
+import type { ItemTypeCount } from "@/lib/db/items"
+import type { DashboardCollection } from "@/lib/db/collections"
 
 interface SidebarProps {
   isCollapsed?: boolean
   className?: string
+  itemTypes: ItemTypeCount[]
+  favoriteCollections: DashboardCollection[]
+  recentCollections: DashboardCollection[]
 }
 
-export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
+export function Sidebar({
+  isCollapsed = false,
+  className,
+  itemTypes,
+  favoriteCollections,
+  recentCollections,
+}: SidebarProps) {
   const pathname = usePathname()
-
-  const favoriteCollections = mockCollections.filter((c) => c.isFavorite)
-  const allCollections = mockCollections
-
-  const itemCountsByType = mockItems.reduce<Record<string, number>>((acc, item) => {
-    acc[item.typeId] = (acc[item.typeId] ?? 0) + 1
-    return acc
-  }, {})
+  const [typesOpen, setTypesOpen] = useState(true)
+  const [collectionsOpen, setCollectionsOpen] = useState(true)
 
   return (
     <div
@@ -46,13 +52,17 @@ export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
           {/* Types Section */}
           <div className="space-y-1">
             {!isCollapsed && (
-              <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => setTypesOpen((open) => !open)}
+                className="flex w-full items-center justify-between rounded-md px-2 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
                 <span>Types</span>
-                <ChevronDown className="h-3 w-3" />
-              </div>
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !typesOpen && "-rotate-90")} />
+              </button>
             )}
-            {mockItemTypes.map((type) => {
-              const href = `/items/${type.name.toLowerCase()}`
+            {(isCollapsed || typesOpen) && itemTypes.map((type) => {
+              const href = `/items/${type.name}`
               const isActive = pathname === href
               const linkCls = cn(
                 "flex items-center justify-between rounded-md px-2 py-1.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
@@ -64,23 +74,21 @@ export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
 
               if (isCollapsed) {
                 return (
-                  <Tooltip key={type.id}>
+                  <Tooltip key={type.name}>
                     <TooltipTrigger render={<Link href={href} className={linkCls} />}>
                       <TypeIcon className={typeIconCls} />
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="capitalize">{type.name}</TooltipContent>
+                    <TooltipContent side="right">{getTypeLabel(type.name)}</TooltipContent>
                   </Tooltip>
                 )
               }
               return (
-                <Link key={type.id} href={href} className={linkCls}>
+                <Link key={type.name} href={href} className={linkCls}>
                   <div className="flex items-center gap-3">
                     <TypeIcon className={typeIconCls} />
-                    <span>{type.name.charAt(0).toUpperCase() + type.name.slice(1)}</span>
+                    <span>{getTypeLabel(type.name)}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {itemCountsByType[type.id] ?? 0}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{type.count}</span>
                 </Link>
               )
             })}
@@ -88,14 +96,19 @@ export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
 
           {/* Collections Section */}
           <div className="space-y-4">
+            {!isCollapsed && (
+              <button
+                type="button"
+                onClick={() => setCollectionsOpen((open) => !open)}
+                className="flex w-full items-center justify-between rounded-md px-2 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <span>Collections</span>
+                <ChevronDown className={cn("h-3 w-3 transition-transform", !collectionsOpen && "-rotate-90")} />
+              </button>
+            )}
+            {(isCollapsed || collectionsOpen) && (
+            <>
             <div className="space-y-1">
-              {!isCollapsed && (
-                <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-muted-foreground">
-                  <span>Collections</span>
-                  <ChevronDown className="h-3 w-3" />
-                </div>
-              )}
-
               {!isCollapsed && <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground mt-2 tracking-wider">FAVORITES</div>}
               {favoriteCollections.map((col) => {
                 const href = `/collections/${col.id}`
@@ -130,7 +143,7 @@ export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
 
             <div className="space-y-1">
               {!isCollapsed && <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground mt-2 tracking-wider">ALL COLLECTIONS</div>}
-              {allCollections.filter(c => !c.isFavorite).map((col) => {
+              {recentCollections.map((col) => {
                 const href = `/collections/${col.id}`
                 const isActive = pathname === href
                 const linkCls = cn(
@@ -155,11 +168,25 @@ export function Sidebar({ isCollapsed = false, className }: SidebarProps) {
                       <Folder className="h-4 w-4 text-muted-foreground" />
                       <span className="truncate">{col.name}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{col.itemCount}</span>
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+                      <span className={cn("h-2 w-2 rounded-full", getTypeClasses(col.primaryType ?? undefined).dot)} />
+                      {col.itemCount}
+                    </span>
                   </Link>
                 )
               })}
+
+              {!isCollapsed && (
+                <Link
+                  href="/collections"
+                  className="block px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  View all collections
+                </Link>
+              )}
             </div>
+            </>
+            )}
           </div>
         </div>
       </ScrollArea>
