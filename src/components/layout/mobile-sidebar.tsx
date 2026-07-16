@@ -6,8 +6,16 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Sidebar } from "./sidebar"
+import type { ItemTypeCount } from "@/lib/db/items"
+import type { DashboardCollection } from "@/lib/db/collections"
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+  itemTypes: ItemTypeCount[]
+  favoriteCollections: DashboardCollection[]
+  recentCollections: DashboardCollection[]
+}
+
+export function MobileSidebar({ itemTypes, favoriteCollections, recentCollections }: MobileSidebarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -31,7 +39,12 @@ export function MobileSidebar() {
         <SheetContent side="left" className="p-0 w-[280px]">
           <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <SheetDescription className="sr-only">Mobile navigation sidebar</SheetDescription>
-          <Sidebar className="w-full border-none h-full" />
+          <Sidebar
+            className="w-full border-none h-full"
+            itemTypes={itemTypes}
+            favoriteCollections={favoriteCollections}
+            recentCollections={recentCollections}
+          />
         </SheetContent>
       </Sheet>
     </>

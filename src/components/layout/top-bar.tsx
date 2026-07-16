@@ -2,17 +2,32 @@ import { Search, Plus, FolderPlus, PanelLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MobileSidebar } from "./mobile-sidebar";
+import type { ItemTypeCount } from "@/lib/db/items";
+import type { DashboardCollection } from "@/lib/db/collections";
 
 interface TopBarProps {
   onToggleSidebar?: () => void;
   isSidebarCollapsed?: boolean;
+  itemTypes: ItemTypeCount[];
+  favoriteCollections: DashboardCollection[];
+  recentCollections: DashboardCollection[];
 }
 
-export function TopBar({ onToggleSidebar, isSidebarCollapsed }: TopBarProps) {
+export function TopBar({
+  onToggleSidebar,
+  isSidebarCollapsed,
+  itemTypes,
+  favoriteCollections,
+  recentCollections,
+}: TopBarProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-4">
-        <MobileSidebar />
+        <MobileSidebar
+          itemTypes={itemTypes}
+          favoriteCollections={favoriteCollections}
+          recentCollections={recentCollections}
+        />
         <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="hidden md:flex">
           <PanelLeft className="h-5 w-5" />
           <span className="sr-only">Toggle Sidebar</span>

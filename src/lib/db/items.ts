@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ITEM_TYPE_NAMES } from "@/lib/constants/item-types";
 
 // No auth yet — dashboard reads the seeded demo user's data (see prisma/seed.ts).
 const DEMO_USER_EMAIL = "demo@devstash.io";
@@ -99,4 +100,32 @@ export async function getDashboardStats(): Promise<DashboardStatsData> {
   ]);
 
   return { totalItems, totalCollections, favoriteItems, favoriteCollections };
+}
+
+export interface ItemTypeCount {
+  name: string;
+  count: number;
+}
+
+export async function getItemTypesWithCounts(): Promise<ItemTypeCount[]> {
+  const user = await prisma.user.findUnique({
+    where: { email: DEMO_USER_EMAIL },
+    select: { id: true },
+  });
+
+  const types = await prisma.itemType.findMany({ where: { isSystem: true } });
+
+  const counts = user
+    ? await prisma.item.groupBy({
+        by: ["itemTypeId"],
+        where: { userId: user.id },
+        _count: { _all: true },
+      })
+    : [];
+  const countByTypeId = new Map(counts.map((c) => [c.itemTypeId, c._count._all]));
+
+  return ITEM_TYPE_NAMES.map((name) => {
+    const type = types.find((t) => t.name === name);
+    return { name, count: type ? countByTypeId.get(type.id) ?? 0 : 0 };
+  });
 }
