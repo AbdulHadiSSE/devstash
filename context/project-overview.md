@@ -752,16 +752,37 @@ devstash/
 | ESLint 9 | ✅ | `eslint.config.mjs` |
 | Root layout | ✅ | `src/app/layout.tsx` |
 | Placeholder homepage | ✅ | `src/app/page.tsx` |
+| shadcn/ui (base-nova style) | ✅ | `components.json`, `src/components/ui/` |
+| next-themes (dark mode default) | ✅ | `src/app/layout.tsx`, `src/components/theme-provider.tsx` |
+| lucide-react icons | ✅ | `package.json` |
+| Dashboard layout (sidebar, top bar, shell, mobile drawer) | ✅ | `src/components/layout/` |
+| Dashboard main components (stats, collections, pinned, recent) | ✅ | `src/components/dashboard/`, `src/app/(dashboard)/dashboard/page.tsx` |
+| Mock data (until DB exists) | ✅ | `src/lib/mock-data.ts` |
+| Item-type icon/color constants | ✅ | `src/lib/constants/item-types.ts` |
 
 ### Actual File Structure (today)
 
 ```
 devstash/
 ├── context/           # Project docs & UI reference screenshots
-├── src/app/
-│   ├── globals.css    # Tailwind v4 entry (@import "tailwindcss")
-│   ├── layout.tsx     # Root layout
-│   └── page.tsx       # Placeholder homepage
+├── src/
+│   ├── app/
+│   │   ├── (dashboard)/
+│   │   │   ├── dashboard/page.tsx  # /dashboard page
+│   │   │   └── layout.tsx          # Dashboard shell layout
+│   │   ├── globals.css             # Tailwind v4 entry + theme tokens
+│   │   ├── layout.tsx              # Root layout (theme + tooltip providers)
+│   │   └── page.tsx                # Placeholder homepage
+│   ├── components/
+│   │   ├── dashboard/  # DashboardStats, PinnedItems, RecentCollections, RecentItemsList
+│   │   ├── layout/     # Sidebar, TopBar, MobileSidebar, DashboardShell
+│   │   ├── ui/         # shadcn components
+│   │   └── theme-provider.tsx
+│   └── lib/
+│       ├── constants/item-types.ts  # Item-type icons, colors, class maps
+│       ├── mock-data.ts
+│       └── utils.ts
+├── components.json
 ├── eslint.config.mjs
 ├── next.config.ts
 ├── package.json
@@ -769,7 +790,7 @@ devstash/
 └── tsconfig.json
 ```
 
-### Design References (not implemented in code)
+### Design References (dashboard implemented against these; item drawer not yet)
 
 - `context/screenshots/dashboard-ui-main.png`
 - `context/screenshots/dashboard-ui-drawer.png`
@@ -778,14 +799,14 @@ devstash/
 
 ## 🚀 Remaining Roadmap
 
-Everything below is **planned** per the product spec above — not yet started in this repo.
+Checked items are done (against mock data where noted); everything else is **planned** per the product spec above — not yet started in this repo.
 
 1. [ ] Set up Prisma with Neon PostgreSQL
 2. [ ] Create database migrations for initial schema
 3. [ ] Seed system item types
 4. [ ] Configure NextAuth v5 (email + GitHub)
-5. [ ] Build core UI components with shadcn/ui
-6. [ ] Build dashboard layout (sidebar, top bar, main content)
+5. [x] Build core UI components with shadcn/ui
+6. [x] Build dashboard layout (sidebar, top bar, main content) — mock-data-backed
 7. [ ] Implement items CRUD
 8. [ ] Implement collections CRUD
 9. [ ] Add search / command palette
@@ -798,4 +819,4 @@ Everything below is **planned** per the product spec above — not yet started i
 
 ---
 
-_Last updated: July 14, 2026_
+_Last updated: July 14, 2026 (dashboard UI phases 1–3 + spec-compliance fixes)_

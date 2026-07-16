@@ -1,80 +1,82 @@
-# DevStash — Project Context
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Overview
 
-DevStash is a unified hub for developer knowledge and resources, built with Next.js App Router. The **product vision** includes saving, organizing, searching, and AI-enhancing code snippets, prompts, commands, notes, files, images, and links, with a freemium model via Stripe. **Current codebase:** early scaffold only — see Current State below.
+DevStash is a unified hub for developer knowledge and resources (snippets, prompts, commands, notes, files, images, links) built with Next.js App Router. The **product vision** includes CRUD, collections, search, AI enhancement, and a freemium model via Stripe. **Current codebase:** early scaffold + static dashboard UI on mock data — see Current State below.
 
-## Tech Stack
+The full product spec (feature list, complete Prisma schema, pricing tiers, UI guidelines) lives in `context/project-overview.md`. Read it before designing any new feature.
 
-| Layer | Technology | Version | Notes |
-|---|---|---|---|
-| **Framework** | Next.js | `16.2.10` | App Router. React Compiler enabled (`reactCompiler: true`). |
-| **UI Library** | React | `19.2.4` | With `react-dom@19.2.4`. |
-| **Language** | TypeScript | `^5` | Strict mode, `bundler` module resolution, `@/*` → `./src/*` path alias. |
-| **Styling** | Tailwind CSS | `^4` | Via `@tailwindcss/postcss` plugin. CSS-first config in `src/app/globals.css`. |
-| **Linting** | ESLint | `^9` | Flat config. |
-| **Package Manager** | npm | — | `package-lock.json` present. |
-
-## Key Patterns & Conventions
-
-> The patterns below describe the **target architecture** from the product spec. They are not yet implemented in the codebase.
-
-### App Router (Next.js 16)
-- **Server Components by Default**: Fetch data directly with Prisma in server components.
-- **Server Actions**: Used for form submissions and simple mutations. Always return `{ success, data, error }`.
-- **API Routes**: Used only for webhooks (Stripe), file uploads (R2), and specific HTTP handlers.
-- **Next.js 16.2.10 may differ from training data** — always consult `node_modules/next/dist/docs/` before writing code.
-
-### Tailwind CSS v4
-- **No `tailwind.config.js`** — v4 uses CSS-first configuration directly in CSS (`src/app/globals.css`).
-- Theme customization, custom utilities, and plugins are declared in CSS using `@theme`, `@utility`, etc.
-
-### Database (Prisma)
-- **Never use `db push`**: Always use `prisma migrate dev` for schema changes.
-- **N+1 Query Prevention**: Utilize Prisma `_count` and `take`/`skip` appropriately.
-
-### Authentication & Gating
-- Access session securely via `getAuthedSession()` helper in `src/lib/action-utils.ts`.
-- Gate pro features (files, images, AI) using the `requirePro()` helper and DB subscription status.
-
-### Testing
-- Vitest is used for unit tests (server actions and utilities).
-- Run with `npm run test`. Test files live next to source files (`feature.test.ts`).
-
-## Current State
-
-Early scaffold and initial UI. The following exist:
-
-- **Next.js 16 + React 19** — `package.json`, `next.config.ts`
-- **TypeScript** — strict mode, path alias (`tsconfig.json`)
-- **Tailwind CSS v4** — minimal setup (`src/app/globals.css`, `postcss.config.mjs`)
-- **React Compiler** — enabled (`next.config.ts`)
-- **ESLint 9** — flat config (`eslint.config.mjs`)
-- **Root layout** — metadata title/description (`src/app/layout.tsx`)
-- **Placeholder homepage** — `<h1>DevStash</h1>` at `/` (`src/app/page.tsx`)
-- **Shadcn UI** — initialized with `next-themes` and `lucide-react`
-- **Dashboard UI Phase 1** — main dashboard layout at `/dashboard` with TopBar (dummy search, new item buttons) and placeholders for Sidebar and Main content.
-- **Mock Data** — static arrays for development (`src/lib/mock-data.ts`)
-- **UI design references** — screenshots in `context/screenshots/`
-
-**Not yet started:** database, auth, items/collections CRUD, search, file uploads, AI, Stripe, tests, or any planned dependencies (Prisma, NextAuth, etc.).
-
-## Development Workflow
-
-1. **Document**: Document the feature/fix in `context/current-feature.md`.
-2. **Branch**: Create a new branch (`feature/*` or `fix/*`).
-3. **Implement**: Write code making minimal changes to accomplish the task.
-4. **Test**: Run `npm run test` and `npm run build` to verify.
-5. **Iterate**: Fix any issues.
-6. **Commit**: Use conventional commits. Never commit if tests/build fail. Ask for permission first.
-7. **Merge & Clean**: Merge to main and delete the branch.
-8. **Mark Done**: Update `current-feature.md`.
-
-## Scripts
+## Commands
 
 | Command | Description |
 |---|---|
 | `npm run dev` | Start dev server (`next dev`) |
-| `npm run build` | Production build (`next build`) |
-| `npm run start` | Start production server (`next start`) |
-| `npm run lint` | Run ESLint |
+| `npm run build` | Production build — the main verification step |
+| `npm run lint` | Run ESLint (flat config, ESLint 9) |
+| `npx shadcn add <component>` | Add a shadcn/ui component to `src/components/ui/` |
+
+**There is no test script yet.** Vitest is planned (unit tests for server actions/utilities, `feature.test.ts` next to source, run via `npm run test`) but not installed. Until then, `npm run build` is the verification gate.
+
+## Tech Stack
+
+| Layer | Technology | Notes |
+|---|---|---|
+| Framework | Next.js `16.2.10` | App Router. React Compiler enabled (`reactCompiler: true` in `next.config.ts`). **Next 16 may differ from training data** — consult `node_modules/next/dist/docs/` or current docs before writing framework code. |
+| UI | React `19.2.4` | Functional components only. |
+| Language | TypeScript `^5` | Strict mode; no `any` (use `unknown`); `@/*` → `./src/*` alias. |
+| Styling | Tailwind CSS `^4` | **CSS-first config** in `src/app/globals.css` via `@theme`/`@utility`. **Never create `tailwind.config.js/ts`** — that's v3. |
+| Components | shadcn/ui (`base-nova` style) | Built on **`@base-ui/react`, not Radix**. Config in `components.json`. Icons: `lucide-react`. |
+| Theming | `next-themes` | Dark mode is the default; light mode optional. |
+
+## Architecture
+
+### Route & Component Structure
+
+- `src/app/(dashboard)/` — route group; its `layout.tsx` wraps pages in `DashboardShell`.
+- `src/components/layout/` — shell: `DashboardShell` (client component holding sidebar collapse state), `Sidebar` (desktop), `MobileSidebar` (Sheet drawer), `TopBar`.
+- `src/components/dashboard/` — dashboard widgets (`DashboardStats`, `PinnedItems`, `RecentCollections`, `RecentItemsList`).
+- `src/components/ui/` — shadcn primitives; add via CLI rather than hand-writing.
+- `src/lib/mock-data.ts` — static `mockUser` / `mockItemTypes` / `mockCollections` / `mockItems` used by all dashboard components until the database exists. The seven system item types (snippet, prompt, command, note, file, image, link) each have a fixed lucide icon and hex color defined in the spec and mirrored here.
+
+Server components by default; add `'use client'` only for interactivity/hooks (the pattern: server page → client shell/widget where state is needed).
+
+### Target architecture (from spec, NOT yet implemented)
+
+- **Data**: Prisma + Neon PostgreSQL. **Never `prisma db push`** — always `prisma migrate dev`. Full schema is in `context/project-overview.md`. Prevent N+1 queries with `_count` and `take`/`skip`.
+- **Mutations**: Server Actions returning `{ success, data, error }`; validate inputs with Zod. API routes only for webhooks (Stripe), file uploads (R2), and future external clients.
+- **Auth**: NextAuth v5 (email/password + GitHub). Session via `getAuthedSession()` in `src/lib/action-utils.ts`; pro features gated by `requirePro()`.
+- **Files**: Cloudflare R2. **AI**: OpenAI GPT-4o mini. **Payments**: Stripe subscriptions.
+
+## Current State
+
+- Next.js 16 + React 19 + TS strict + Tailwind v4 + ESLint 9 scaffold; React Compiler on.
+- shadcn/ui initialized (avatar, badge, button, card, input, scroll-area, separator, sheet, tooltip).
+- **Dashboard UI complete (Phases 1–3)** at `/dashboard`: TopBar (dummy search/new-item buttons), collapsible desktop sidebar + mobile Sheet drawer, stats cards, pinned items, recent collections, recent items — all rendering `src/lib/mock-data.ts`.
+- Placeholder homepage at `/`.
+
+**Not started:** database, auth, CRUD, search, uploads, AI, Stripe, tests, and their dependencies (Prisma, NextAuth, Zod, Vitest, etc.).
+
+## Development Workflow
+
+Defined in `context/ai-interaction.md` — follow it for every feature/fix:
+
+1. **Document** the feature in `context/current-feature.md`.
+2. **Branch**: `feature/*` or `fix/*` — never work directly on `main`.
+3. **Implement** with minimal changes; don't add features beyond the spec; don't refactor unrelated code.
+4. **Verify**: `npm run build` (and `npm run test` once tests exist) must pass.
+5. **Commit**: conventional commits (`feat:`, `fix:`, `chore:`). **Ask before committing** — never auto-commit, never commit failing builds. Never mention "Generated with Claude" in commit messages.
+6. **Merge to main**, then ask before deleting the branch.
+7. **Mark done** in `context/current-feature.md` and append to its History section.
+
+Other standing rules: ask before large refactors or deleting files; if stuck after 2–3 attempts, stop and explain rather than trying random fixes.
+
+## Context Docs
+
+- `context/project-overview.md` — full product spec, data model, Prisma schema, pricing, UI guidelines.
+- `context/coding-standards.md` — detailed TS/React/Next/Tailwind/testing standards.
+- `context/ai-interaction.md` — workflow and commit rules (summarized above).
+- `context/current-feature.md` — active feature doc + project history log.
+- `context/features/*.md` — per-feature specs (dashboard phases 1–3 so far).
+- `context/screenshots/` — dashboard UI design references.
