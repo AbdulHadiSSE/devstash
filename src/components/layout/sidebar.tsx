@@ -7,6 +7,7 @@ import { getTypeIcon, getTypeClasses, getTypeLabel } from "@/lib/constants/item-
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Badge } from "@/components/ui/badge"
 import { ChevronDown, Folder, Layers, Settings, Star } from "lucide-react"
 import type { ItemTypeCount } from "@/lib/db/items"
 import type { DashboardCollection } from "@/lib/db/collections"
@@ -87,6 +88,11 @@ export function Sidebar({
                   <div className="flex items-center gap-3">
                     <TypeIcon className={typeIconCls} />
                     <span>{getTypeLabel(type.name)}</span>
+                    {(type.name === "file" || type.name === "image") && (
+                      <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-semibold tracking-wide text-muted-foreground">
+                        PRO
+                      </Badge>
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground">{type.count}</span>
                 </Link>
