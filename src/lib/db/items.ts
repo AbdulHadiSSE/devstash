@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ITEM_TYPE_NAMES } from "@/lib/constants/item-types";
-
-// No auth yet — dashboard reads the seeded demo user's data (see prisma/seed.ts).
-const DEMO_USER_EMAIL = "demo@devstash.io";
+import { getDemoUser } from "@/lib/db/user";
 
 export interface DashboardItem {
   id: string;
@@ -40,39 +38,31 @@ function toDashboardItem(item: RawItem): DashboardItem {
 }
 
 export async function getPinnedItems(limit = 10): Promise<DashboardItem[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: {
-      items: {
-        where: { isPinned: true },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        include: { itemType: true, tags: true },
-      },
-    },
-  });
-
+  const user = await getDemoUser();
   if (!user) return [];
 
-  return user.items.map(toDashboardItem);
+  const items = await prisma.item.findMany({
+    where: { userId: user.id, isPinned: true },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: { itemType: true, tags: true },
+  });
+
+  return items.map(toDashboardItem);
 }
 
 export async function getRecentItems(limit = 10): Promise<DashboardItem[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: {
-      items: {
-        where: { isPinned: false },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        include: { itemType: true, tags: true },
-      },
-    },
-  });
-
+  const user = await getDemoUser();
   if (!user) return [];
 
-  return user.items.map(toDashboardItem);
+  const items = await prisma.item.findMany({
+    where: { userId: user.id, isPinned: false },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: { itemType: true, tags: true },
+  });
+
+  return items.map(toDashboardItem);
 }
 
 export interface DashboardStatsData {
@@ -83,10 +73,7 @@ export interface DashboardStatsData {
 }
 
 export async function getDashboardStats(): Promise<DashboardStatsData> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: { id: true },
-  });
+  const user = await getDemoUser();
 
   if (!user) {
     return { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 };
@@ -108,10 +95,7 @@ export interface ItemTypeCount {
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeCount[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: { id: true },
-  });
+  const user = await getDemoUser();
 
   const types = await prisma.itemType.findMany({ where: { isSystem: true } });
 

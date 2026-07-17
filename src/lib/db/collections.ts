@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { getDemoUser } from "@/lib/db/user";
 
-// No auth yet — dashboard reads the seeded demo user's data (see prisma/seed.ts).
-const DEMO_USER_EMAIL = "demo@devstash.io";
+// Matches the sidebar's collections cap; kept as a single constant so both
+// queries stay in sync.
+const COLLECTIONS_LIMIT = 6;
 
 export interface DashboardCollection {
   id: string;
@@ -40,25 +42,22 @@ function toDashboardCollection(collection: RawCollection): DashboardCollection {
   };
 }
 
-export async function getDashboardCollections(limit = 6): Promise<DashboardCollection[]> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: {
-      collections: {
-        orderBy: { updatedAt: "desc" },
-        take: limit,
-        include: {
-          items: {
-            include: { item: { include: { itemType: true } } },
-          },
-        },
+export async function getDashboardCollections(limit = COLLECTIONS_LIMIT): Promise<DashboardCollection[]> {
+  const user = await getDemoUser();
+  if (!user) return [];
+
+  const collections = await prisma.collection.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+    include: {
+      items: {
+        include: { item: { include: { itemType: true } } },
       },
     },
   });
 
-  if (!user) return [];
-
-  return user.collections.map(toDashboardCollection);
+  return collections.map(toDashboardCollection);
 }
 
 export interface SidebarCollections {
@@ -66,24 +65,51 @@ export interface SidebarCollections {
   recents: DashboardCollection[];
 }
 
-export async function getSidebarCollections(): Promise<SidebarCollections> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: {
-      collections: {
-        orderBy: { updatedAt: "desc" },
-        include: {
-          items: {
-            include: { item: { include: { itemType: true } } },
-          },
-        },
+interface RawSidebarCollection {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  _count: { items: number };
+  items: { item: { itemType: { name: string } } }[];
+}
+
+// Sidebar only ever renders `itemCount` and `primaryType` (a colored dot) —
+// see src/components/layout/sidebar.tsx — so this uses `_count` for the
+// total instead of loading every item, and a single bounded (`take: 1`)
+// nested item for an approximate primary type instead of computing the true
+// most-common type across all items. `typeNames` is left empty since the
+// sidebar doesn't render the multi-type icon row (unlike the dashboard grid).
+function toSidebarCollection(collection: RawSidebarCollection): DashboardCollection {
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection._count.items,
+    primaryType: collection.items[0]?.item.itemType.name ?? null,
+    typeNames: [],
+  };
+}
+
+export async function getSidebarCollections(limit = COLLECTIONS_LIMIT): Promise<SidebarCollections> {
+  const user = await getDemoUser();
+  if (!user) return { favorites: [], recents: [] };
+
+  const collections = await prisma.collection.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+    include: {
+      _count: { select: { items: true } },
+      items: {
+        take: 1,
+        include: { item: { include: { itemType: true } } },
       },
     },
   });
 
-  if (!user) return { favorites: [], recents: [] };
-
-  const mapped = user.collections.map(toDashboardCollection);
+  const mapped = collections.map(toSidebarCollection);
   return {
     favorites: mapped.filter((c) => c.isFavorite),
     recents: mapped.filter((c) => !c.isFavorite),
