@@ -1,9 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import authConfig from "./auth.config";
+
+export class OAuthAccountNoPasswordError extends CredentialsSignin {
+  code = "oauth-account-no-password";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -29,7 +33,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!email || !password) return null;
 
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user?.password) return null;
+        if (!user) return null;
+        if (!user.password) throw new OAuthAccountNoPasswordError();
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;

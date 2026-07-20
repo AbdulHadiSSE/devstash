@@ -1,20 +1,33 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { mockUser } from "@/lib/mock-data"
 import { getTypeIcon, getTypeClasses, getTypeLabel } from "@/lib/constants/item-types"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { ChevronDown, Folder, Layers, Settings, Star } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { UserAvatar } from "@/components/shared/user-avatar"
+import { ChevronDown, Folder, Layers, LogOut, Settings, Star } from "lucide-react"
 import type { ItemTypeCount } from "@/lib/db/items"
 import type { DashboardCollection } from "@/lib/db/collections"
+
+export interface SidebarUser {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
 
 interface SidebarProps {
   isCollapsed?: boolean
   className?: string
+  user?: SidebarUser
   itemTypes: ItemTypeCount[]
   favoriteCollections: DashboardCollection[]
   recentCollections: DashboardCollection[]
@@ -23,6 +36,7 @@ interface SidebarProps {
 export function Sidebar({
   isCollapsed = false,
   className,
+  user,
   itemTypes,
   favoriteCollections,
   recentCollections,
@@ -198,20 +212,44 @@ export function Sidebar({
       </ScrollArea>
 
       <div className="p-3 border-t">
-        <div className={cn("flex items-center justify-between px-2 py-2 rounded-lg hover:bg-accent cursor-pointer transition-colors", isCollapsed && "justify-center px-0")}>
-          <div className="flex items-center gap-3 min-w-0">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={mockUser.image} alt={mockUser.name} />
-              <AvatarFallback>{mockUser.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="truncate text-sm font-medium text-foreground">{mockUser.name}</span>
-                <span className="truncate text-[10px] text-muted-foreground">{mockUser.email}</span>
-              </div>
-            )}
-          </div>
-          {!isCollapsed && <Settings className="h-4 w-4 text-muted-foreground shrink-0 hover:text-foreground" />}
+        <div className={cn("flex items-center gap-1 px-1 py-1 rounded-lg", isCollapsed && "justify-center px-0")}>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "flex flex-1 items-center gap-3 min-w-0 rounded-lg px-1 py-1 text-left transition-colors hover:bg-accent outline-none",
+                isCollapsed && "flex-none justify-center"
+              )}
+            >
+              <UserAvatar name={user?.name} image={user?.image} />
+              {!isCollapsed && (
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate text-sm font-medium text-foreground">{user?.name ?? "User"}</span>
+                  <span className="truncate text-[10px] text-muted-foreground">{user?.email}</span>
+                </div>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56">
+              <DropdownMenuItem variant="destructive" onClick={() => signOut({ redirectTo: "/sign-in" })}>
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {!isCollapsed && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Link
+                    href="/profile"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  />
+                }
+              >
+                <Settings className="h-4 w-4" />
+              </TooltipTrigger>
+              <TooltipContent side="top">Profile</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     </div>

@@ -5,17 +5,18 @@ import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { Sidebar } from "./sidebar"
+import { Sidebar, type SidebarUser } from "./sidebar"
 import type { ItemTypeCount } from "@/lib/db/items"
 import type { DashboardCollection } from "@/lib/db/collections"
 
 interface MobileSidebarProps {
+  user?: SidebarUser
   itemTypes: ItemTypeCount[]
   favoriteCollections: DashboardCollection[]
   recentCollections: DashboardCollection[]
 }
 
-export function MobileSidebar({ itemTypes, favoriteCollections, recentCollections }: MobileSidebarProps) {
+export function MobileSidebar({ user, itemTypes, favoriteCollections, recentCollections }: MobileSidebarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -41,6 +42,7 @@ export function MobileSidebar({ itemTypes, favoriteCollections, recentCollection
           <SheetDescription className="sr-only">Mobile navigation sidebar</SheetDescription>
           <Sidebar
             className="w-full border-none h-full"
+            user={user}
             itemTypes={itemTypes}
             favoriteCollections={favoriteCollections}
             recentCollections={recentCollections}

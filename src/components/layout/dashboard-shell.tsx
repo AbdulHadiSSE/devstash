@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Sidebar } from "./sidebar"
+import { Sidebar, type SidebarUser } from "./sidebar"
 import { TopBar } from "./top-bar"
 import type { ItemTypeCount } from "@/lib/db/items"
 import type { DashboardCollection } from "@/lib/db/collections"
 
 interface DashboardShellProps {
   children: React.ReactNode
+  user?: SidebarUser
   itemTypes: ItemTypeCount[]
   favoriteCollections: DashboardCollection[]
   recentCollections: DashboardCollection[]
@@ -15,6 +16,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({
   children,
+  user,
   itemTypes,
   favoriteCollections,
   recentCollections,
@@ -26,6 +28,7 @@ export function DashboardShell({
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         className="hidden md:flex"
+        user={user}
         itemTypes={itemTypes}
         favoriteCollections={favoriteCollections}
         recentCollections={recentCollections}
@@ -34,6 +37,7 @@ export function DashboardShell({
         <TopBar
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           isSidebarCollapsed={isSidebarCollapsed}
+          user={user}
           itemTypes={itemTypes}
           favoriteCollections={favoriteCollections}
           recentCollections={recentCollections}

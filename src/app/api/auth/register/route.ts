@@ -38,7 +38,11 @@ export async function POST(request: Request) {
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     return NextResponse.json(
-      { error: "An account with this email already exists." },
+      {
+        error: existingUser.password
+          ? "An account with this email already exists."
+          : "This email is already linked to a GitHub sign-in. Use \"Sign in with GitHub\" instead.",
+      },
       { status: 409 },
     );
   }
